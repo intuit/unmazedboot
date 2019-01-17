@@ -1,0 +1,23 @@
+// https://dzone.com/articles/resource-filtering-gradle
+import org.apache.tools.ant.filters.*
+
+// Expose the commit and branch values for the resources below
+ext {
+  time = new Date().format("yyyy-MM-dd-HH:mm:ss-z", TimeZone.getTimeZone('UTC'))
+  version = project.version
+}
+
+processResources {
+  filter ReplaceTokens, tokens: [
+    "build.time": time,
+    "build.version": version
+  ]
+}
+
+// Process resources when compiling
+compileJava.dependsOn(processResources) // added for spring-boot-configuration-processor
+
+// Include the processResources when running "gradle bootRun"
+bootJar {
+  launchScript()
+}

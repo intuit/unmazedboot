@@ -1,0 +1,203 @@
+# Based on https://gitlab.com/andy.wilson/get-docker-compose-latest-version/blob/0f888504cd40feca0cfaecfa9007cdd1c3e5d1d3/.gitlab-ci.yml
+# https://stackoverflow.com/questions/39868369/run-docker-compose-build-in-gitlab-ci-yml/52734017#52734017
+# Use Docker-in-Docker service
+image:
+  name: docker/compose:1.23.1 # update tag to whatever version you want to use.
+  entrypoint: ["/bin/sh", "-c"]
+
+variables:
+  # When using dind service we need to instruct docker, to talk with the
+  # daemon started inside of the service. The daemon is available with
+  # a network connection instead of the default /var/run/docker.sock socket.
+  #
+  # The 'docker' hostname is the alias of the service container as described at
+  # https://docs.gitlab.com/ee/ci/docker/using_docker_images.html#accessing-the-services
+  #
+  # Note that if you're using Kubernetes executor, the variable should be set to
+  # tcp://localhost:2375 because of how Kubernetes executor connects services
+  # to the job container
+  DOCKER_HOST: tcp://docker:2375/
+  # When using dind, it's wise to use the overlayfs driver for
+  # improved performance. # workaround GitLab running `sh`
+  # https://gitlab.com/gitlab-org/gitlab-ce/issues/30426
+  DOCKER_DRIVER: overlay2
+
+services:
+  - name: docker:dind
+
+before_script:
+  - docker version
+  - docker-compose version
+  - env
+
+stages:
+  - setup
+  - lint
+  - docker-build
+  - docker-push
+
+# Run our pre-lint checks
+tools-version:
+  stage: setup
+  script:
+    - docker pull hadolint/hadolint
+    - docker run hadolint/hadolint hadolint --version
+    - docker pull mivok/markdownlint
+    - docker run mivok/markdownlint --version
+
+dockerfiles:
+  stage: lint
+  script:
+    # excluding a few https://github.com/hadolint/hadolint/issues/281, https://github.com/hadolint/hadolint/issues/279
+    # $ find . -name Dockerfile \( ! -path ./runner/openjdk-8/Dockerfile  ! -path ./runner/openjdk-8-x-openjdk-10/Dockerfile ! -path ./runner/openjdk-8-x-openjdk-11/Dockerfile ! -path ./runner/openjdk-10/Dockerfile  \) -exec echo "echo 'hadolint {}' && docker run -i hadolint/hadolint hadolint - < {}" \;
+    - echo 'hadolint ./samples/gradle-java-jdk8-x-jre11-custom/Dockerfile' && docker run -i hadolint/hadolint hadolint - < ./samples/gradle-java-jdk8-x-jre11-custom/Dockerfile
+    - echo 'hadolint ./samples/gradle-java-jdk10-jre10/Dockerfile' && docker run -i hadolint/hadolint hadolint - < ./samples/gradle-java-jdk10-jre10/Dockerfile
+    - echo 'hadolint ./samples/gradle-java-jdk8-x-jre10-custom/Dockerfile' && docker run -i hadolint/hadolint hadolint - < ./samples/gradle-java-jdk8-x-jre10-custom/Dockerfile
+    - echo 'hadolint ./samples/gradle-java-jdk8-jre8/Dockerfile' && docker run -i hadolint/hadolint hadolint - < ./samples/gradle-java-jdk8-jre8/Dockerfile
+    - echo 'hadolint ./builder/maven-3/jdk-10/Dockerfile' && docker run -i hadolint/hadolint hadolint - < ./builder/maven-3/jdk-10/Dockerfile
+    - echo 'hadolint ./builder/maven-3/jdk-8/Dockerfile' && docker run -i hadolint/hadolint hadolint - < ./builder/maven-3/jdk-8/Dockerfile
+    - echo 'hadolint ./builder/maven-3/jdk-8-x-jdk-11/Dockerfile' && docker run -i hadolint/hadolint hadolint - < ./builder/maven-3/jdk-8-x-jdk-11/Dockerfile
+    - echo 'hadolint ./builder/maven-3/jdk-8-x-jdk-10/Dockerfile' && docker run -i hadolint/hadolint hadolint - < ./builder/maven-3/jdk-8-x-jdk-10/Dockerfile
+    - echo 'hadolint ./builder/gradle-4/jdk-10/Dockerfile' && docker run -i hadolint/hadolint hadolint - < ./builder/gradle-4/jdk-10/Dockerfile
+    - echo 'hadolint ./builder/gradle-4/jdk-8/Dockerfile' && docker run -i hadolint/hadolint hadolint - < ./builder/gradle-4/jdk-8/Dockerfile
+    - echo 'hadolint ./builder/gradle-4/jdk-8-x-jdk-11/Dockerfile' && docker run -i hadolint/hadolint hadolint - < ./builder/gradle-4/jdk-8-x-jdk-11/Dockerfile
+    - echo 'hadolint ./builder/gradle-4/jdk-8-x-jdk-10/Dockerfile' && docker run -i hadolint/hadolint hadolint - < ./builder/gradle-4/jdk-8-x-jdk-10/Dockerfile
+
+docker-compose:
+  stage: lint
+  script:
+    - >
+      docker-compose
+      --file - < docker-compose.yml
+      config
+
+# lint the README using Markdownlint
+readme:
+  stage: lint
+  allow_failure: True
+  script:
+    - >
+      docker run -i
+      mivok/markdownlint
+      --rules ~MD013
+      - < README.md
+
+# Lint the Dockerfile using Hadolint
+build-gitlab:
+  stage: docker-build
+  before_script:
+    # Private registry here in GitLabs require login
+    # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#authenticating-to-the-container-registry
+    # https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#creating-a-personal-access-token
+    # Variables are in the environment https://gitlab.com/groups/supercash/-/settings/ci_cd
+    # Look at the env vars above for details
+    - docker login -u ${GITLAB_DOCKER_LOGIN} -p ${GITLAB_DOCKER_PASSWORD} ${CI_REGISTRY}
+
+    # Process images with docker-compose config
+    - apk add --no-cache curl jq python py-pip
+    - pip install yq
+
+  script:
+      # Get the name of the original image by compose to store in a temporary script at dockerhub-images.sh
+      # So that we can run it in deploy https://gitlab.com/gitlab-org/gitlab-runner/issues/1099#note_4002529
+    - BUILDER_GIT_SHA=${CI_COMMIT_SHA}
+    - BUILDER_GIT_BRANCH=${CI_COMMIT_REF_NAME}
+    - if [ "${BUILDER_GIT_BRANCH}" = "master" ]; then DOCKER_IMAGE_TAG="latest"; else DOCKER_IMAGE_TAG="${BUILDER_GIT_BRANCH}"; fi
+    - echo "Setting the docker image tag as ${DOCKER_IMAGE_TAG}"
+    - docker-compose build --pull --parallel
+
+    - echo "Current docker images"
+    - docker images
+
+    # Create the list of images
+    - mkdir images-list/
+
+    - IMAGES=$(docker-compose config | yq '.' | jq -r '..|.image? | select(.!=null)')
+    - echo "Current images are the folloing ${IMAGES}"
+    - >
+      for IMAGE_NAME in ${IMAGES}; do
+        DOCKER_HUB_IMAGE_TAG=${IMAGE_NAME};
+        echo "";
+        echo "=> processing image ${DOCKER_HUB_IMAGE_TAG}";
+        echo "";
+
+        IMAGE=${DOCKER_HUB_IMAGE_TAG%:*};
+        TAG=${DOCKER_HUB_IMAGE_TAG#*:};
+        GROUP=${IMAGE/unmazedboot\//}
+
+        GITLAB_IMAGE="${CI_REGISTRY_IMAGE}/${GROUP}/${TAG}:${DOCKER_IMAGE_TAG}";
+        echo "=> Tag image ${DOCKER_HUB_IMAGE_TAG} for gitlab as ${GITLAB_IMAGE}";
+        echo "docker tag ${DOCKER_HUB_IMAGE_TAG} ${GITLAB_IMAGE}";
+        docker tag ${DOCKER_HUB_IMAGE_TAG} ${GITLAB_IMAGE};
+        echo "";
+
+        echo "=> Pushing to Gitlab ${GITLAB_IMAGE}";
+        docker push ${GITLAB_IMAGE};
+        echo "";
+
+        METADATA_FILE="images-list/${CI_COMMIT_SHA}-${TAG}-image.txt";
+        echo "<= Saving metadata '${GITLAB_IMAGE}|${DOCKER_HUB_IMAGE_TAG}' at ${METADATA_FILE}";
+        echo "${GITLAB_IMAGE}|${DOCKER_HUB_IMAGE_TAG}" > ${METADATA_FILE};
+      done
+
+    # ^^^ Tag and push the image with the name of this repo to be reused in the deploy stage
+    # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#container-registry-examples
+    # https://forum.gitlab.com/t/passing-docker-image-between-build-and-test-stage-in-gitlab-runner/2444/9"
+
+  artifacts:
+    paths:
+    - images-list/
+    when: on_success
+
+push-github:
+  stage: docker-push
+  dependencies:
+    - build-gitlab
+  before_script:
+    # Private registry here in GitLabs require login
+    # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#authenticating-to-the-container-registry
+    # https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#creating-a-personal-access-token
+    # Look at the env vars above for details
+    - echo "Login to the GitLab Docker Registry"
+    - docker login -u ${GITLAB_DOCKER_LOGIN} -p ${GITLAB_DOCKER_PASSWORD} ${CI_REGISTRY}
+
+    # Login to the AWS Docker Registry
+    - echo "Login to Dockerhub Registry"
+    - docker login -u ${DOCKERHUB_LOGIN} -p ${DOCKERHUB_PASSWORD}
+
+    - echo "Here's the Docker registry details docker info"
+    - docker info | grep Registry
+
+  script:
+    # Pull and tag the gitlab image with the original docker image name again
+    # https://gitlab.com/gitlab-org/gitlab-runner/issues/1099#note_4002529
+
+    # Artifacts are created under CI_PROJECT_DIR https://forum.gitlab.com/t/gitlab-ci-artifacts-not-found/7588
+    - echo "Looking at the files at ${CI_PROJECT_DIR}"
+
+    - IMAGE_FILES=$(find ${CI_PROJECT_DIR} -name "*-image.txt")
+    - echo "Current images metadata the folloing \n ${IMAGE_FILES}"
+    # the image name below IMAGE_FILE is on the format "gitlab|github created above"
+
+    - >
+      for IMAGE_FILE in ${IMAGE_FILES}; do
+        NAMES=$(cat ${IMAGE_FILE});
+        GITLAB_IMAGE=${NAMES%|*};
+        DOCKER_HUB_IMAGE=${NAMES#*|};
+        echo "";
+        echo "<========= pulling ${GITLAB_IMAGE}";
+        docker pull ${GITLAB_IMAGE};
+        echo "";
+
+        echo "========= tagging ${GITLAB_IMAGE} as ${DOCKER_HUB_IMAGE}";
+        docker tag ${GITLAB_IMAGE} ${DOCKER_HUB_IMAGE};
+        echo ""
+
+        echo "=========> pushing ${DOCKER_HUB_IMAGE}";
+        docker push ${DOCKER_HUB_IMAGE};
+      done
+
+    - echo "Pushed all images to DockerHub!!!"
+
+  only:
+    - master

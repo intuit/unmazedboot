@@ -1,0 +1,7 @@
+app:
+  name: My App
+  description: Default profile
+
+build:
+  version: "@build.version@"
+  time: "@build.time@"

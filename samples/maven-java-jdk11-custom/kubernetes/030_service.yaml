@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8s-jmc-sample
+  labels:
+    app: k8s-jmc-sample
+    tire: backend
+spec:
+  type: NodePort
+  ports:
+  - port: 30001
+    targetPort: 30001
+    nodePort: 30001
+    name: k8s-jmc-sample
+  selector:
+    app: k8s-jmc-sample
+    tire: backend

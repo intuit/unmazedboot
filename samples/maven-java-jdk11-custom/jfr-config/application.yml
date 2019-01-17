@@ -1,0 +1,26 @@
+# Spring関連
+spring:
+  resources:
+    add-mappings: false
+  mvc:
+    throw-exception-if-no-handler-found: true
+
+server:
+  error:
+    path: /error
+  context-path: /
+  restTemplate:
+    defaultMaxPerRoute: 5
+    maxTotal: 30
+    connectionRequestTimeout: 2000
+    connectTimeout: 2000
+    readTimeout: 3000
+    socketTimeout: 3000
+
+management:
+  export.simple.enabled: true
+  endpoints.web.exposure.include:
+    - metrics
+    - info
+    - health
+    - env

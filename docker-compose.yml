@@ -1,0 +1,227 @@
+version: "3.7"
+
+services:
+
+############# Builder JDK 8
+
+  builder-gradle4.10.2-jdk8-slim:
+    image: intuit/unmazedboot-builder-gradle:4.10.2-jdk8-slim${UNMAZEDBOOT_BUILDER_GRADLE_VERSION}
+    build:
+      context: builder
+      dockerfile: gradle.Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=gradle:4.10.2-jdk8-slim
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=echo none
+
+  builder-gradle4.10.2-jdk8-alpine:
+    image: intuit/unmazedboot-builder-gradle:4.10.2-jdk8-alpine${UNMAZEDBOOT_BUILDER_GRADLE_VERSION}
+    build:
+      context: builder
+      dockerfile: gradle.Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=gradle:4.10.2-jdk8-alpine
+          # https://github.com/passbolt/passbolt_docker/issues/75#issuecomment-439629647
+          # The command cp -t used below does not work without coreutils
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=apk add coreutils --no-cache
+
+  builder-gradle5.0.0-jdk8-slim:
+    image: intuit/unmazedboot-builder-gradle:5.0.0-jdk8-slim${UNMAZEDBOOT_BUILDER_GRADLE_VERSION}
+    build:
+      context: builder
+      dockerfile: gradle.Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=gradle:5.0.0-jdk8-slim
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=echo none
+
+  builder-gradle5.0.0-jdk8-alpine:
+    image: intuit/unmazedboot-builder-gradle:5.0.0-jdk8-alpine${UNMAZEDBOOT_BUILDER_GRADLE_VERSION}
+    build:
+      context: builder
+      dockerfile: gradle.Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=gradle:5.0.0-jdk8-alpine
+          # https://github.com/passbolt/passbolt_docker/issues/75#issuecomment-439629647
+          # The command cp -t used below does not work without coreutils
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=apk add coreutils --no-cache
+
+  builder-maven3.6.0-jdk8-slim:
+    image: intuit/unmazedboot-builder-maven:3.6.0-jdk8-slim${UNMAZEDBOOT_BUILDER_MAVEN_VERSION}
+    build:
+      context: builder
+      dockerfile: maven.Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=maven:3.6.0-jdk-8-slim
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=echo none
+
+  builder-maven3.6.0-jdk8-alpine:
+    image: intuit/unmazedboot-builder-maven:3.6.0-jdk8-alpine${UNMAZEDBOOT_BUILDER_MAVEN_VERSION}
+    build:
+      context: builder
+      dockerfile: maven.Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=maven:3.6.0-jdk-8-alpine
+          # https://github.com/passbolt/passbolt_docker/issues/75#issuecomment-439629647
+          # The command cp -t used below does not work without coreutils
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=apk add coreutils --no-cache
+
+############# Builder JDK 11
+
+  builder-gradle4.10.2-jdk11-slim:
+    image: intuit/unmazedboot-builder-gradle:4.10.2-jdk11-slim${UNMAZEDBOOT_BUILDER_GRADLE_VERSION}
+    build:
+      context: builder
+      dockerfile: gradle.Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=gradle:4.10.2-jdk11-slim
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=echo none
+
+  builder-gradle5.0.0-jdk11-slim:
+    image: intuit/unmazedboot-builder-gradle:5.0.0-jdk11-slim${UNMAZEDBOOT_BUILDER_GRADLE_VERSION}
+    build:
+      context: builder
+      dockerfile: gradle.Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=gradle:5.0.0-jdk11-slim
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=echo none
+
+  builder-maven3.6.0-jdk11-slim:
+    image: intuit/unmazedboot-builder-maven:3.6.0-jdk11-slim${UNMAZEDBOOT_BUILDER_MAVEN_VERSION}
+    build:
+      context: builder
+      dockerfile: maven.Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=maven:3.6.0-jdk-11-slim
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=echo none
+
+############# Builder JDK 12
+
+  builder-maven3.6.0-jdk12-alpine:
+    image: intuit/unmazedboot-builder-maven:3.6.0-jdk12-alpine${UNMAZEDBOOT_BUILDER_MAVEN_VERSION}
+    build:
+      context: builder
+      dockerfile: maven.Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=maven:3.6.0-jdk-12-alpine
+          # https://github.com/passbolt/passbolt_docker/issues/75#issuecomment-439629647
+          # The command cp -t used below does not work without coreutils
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=apk add coreutils --no-cache
+
+############ Linker
+
+  linker-jdk11-alpine:
+    image: intuit/unmazedboot-linker:jdk11-alpine${UNMAZEDBOOT_LINKER_VERSION}
+    build:
+      context: linker
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=alpine:3.8
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=wget https://download.java.net/java/early_access/alpine/25/binaries/openjdk-11-ea+25_linux-x64-musl_bin.tar.gz && tar zxf openjdk-11-ea+25_linux-x64-musl_bin.tar.gz && ln -s jdk-11 jdk && rm -f openjdk-11-ea+25_linux-x64-musl_bin.tar.gz
+
+  # https://github.com/docker-library/openjdk/issues/217#issuecomment-436275472
+  # Debian generates large libjvm and can be decreased
+  linker-jdk11-debian:
+    image: intuit/unmazedboot-linker:jdk11-debian${UNMAZEDBOOT_LINKER_VERSION}
+    build:
+      context: linker
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=openjdk:11-jdk-slim
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=apt-get update && apt-get install -y binutils
+        - UNMAZEDBOOT_POST_JLINK_CMD=find /opt/jdk-custom/  -name libjvm.so | xargs ls -lah && find /opt/jdk-custom  -name libjvm.so | xargs strip -p --strip-unneeded && find /opt/jdk-custom/  -name libjvm.so | xargs ls -lah
+
+  linker-jdk12-alpine:
+    image: intuit/unmazedboot-linker:jdk12-alpine${UNMAZEDBOOT_LINKER_VERSION}
+    build:
+      context: linker
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=openjdk:12-jdk-alpine
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=echo none
+
+  linker-jdk12-debian:
+    image: intuit/unmazedboot-linker:jdk12-debian${UNMAZEDBOOT_LINKER_VERSION}
+    build:
+      context: linker
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=openjdk:12-jdk
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=echo none
+
+  linker-oracheljdk11-centos:
+    image: intuit/unmazedboot-linker:oracheljdk11-centos${UNMAZEDBOOT_LINKER_VERSION}
+    build:
+      context: linker
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=sgrio/java-oracle:jdk_11_centos
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=echo none
+        - UNMAZEDBOOT_CUSTOM_JLINK_PATH=/usr/lib/jvm/java-11-oracle/bin/jlink
+
+############ Runner (Custom)
+
+  runner-custom-jdk-alpine3.8:
+    image: intuit/unmazedboot-runner:custom-jdk-alpine3.8${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: runner
+      dockerfile: custom-jlink-jdk/Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=alpine:3.8
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=apk update && apk add bash ca-certificates libressl libressl-dev --no-cache && update-ca-certificates
+
+  runner-custom-jdk-centos7:
+    image: intuit/unmazedboot-runner:custom-jdk-centos7${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: runner
+      dockerfile: custom-jlink-jdk/Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=centos:7.5.1804
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=yum -y install openssl
+
+  runner-custom-jdk-debian9-slim:
+    image: intuit/unmazedboot-runner:custom-jdk-debian9-slim${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: runner
+      dockerfile: custom-jlink-jdk/Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=debian:sid-20181112-slim
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+  runner-openjdk-8u181-debian9-slim:
+    image: intuit/unmazedboot-runner:openjdk-8u181-debian9-slim${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: runner
+      dockerfile: regular-jdk/Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=openjdk:8u181-jre-slim
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=echo none
+
+  runner-openjdk-8u181-alpine3.8:
+    image: intuit/unmazedboot-runner:openjdk-8u181-alpine3.8${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: runner
+      dockerfile: regular-jdk/Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=openjdk:8u181-jre-alpine3.8
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=apk update && apk add bash ca-certificates libressl libressl-dev --no-cache && update-ca-certificates
+
+  runner-openjdk-11-debian-slim:
+    image: intuit/unmazedboot-runner:openjdk-11-debian-slim${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: runner
+      dockerfile: regular-jdk/Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=openjdk:11-jre-slim
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=echo none
+
+  runner-oraclejdk-jdk_11_centos:
+    image: intuit/unmazedboot-runner:oraclejdk-11-centos${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: runner
+      dockerfile: regular-jdk/Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=sgrio/java-oracle:jdk_11_centos
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=echo none
+
+  runner-oraclejdk-11-alpine:
+    image: intuit/unmazedboot-runner:oraclejdk-11-alpine${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: runner
+      dockerfile: regular-jdk/Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=sgrio/java-oracle:jdk_11_alpine
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=apk update && apk add bash ca-certificates libressl libressl-dev --no-cache && update-ca-certificates

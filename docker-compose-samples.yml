@@ -1,0 +1,125 @@
+version: "3.7"
+
+services:
+
+  sample-gradle-java-jre8:
+    image: intuit/unmazedboot-sample:jdk8-jre8-debian${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: samples/gradle-java-jdk8-jre8
+      args:
+        - UNMAZEDBOOT_BUILDER_GRADLE_VERSION=${UNMAZEDBOOT_BUILDER_GRADLE_VERSION}
+        - UNMAZEDBOOT_RUNNER_VERSION=${UNMAZEDBOOT_RUNNER_VERSION}
+        - UNMAZEDBOOT_BUILDER_GIT_SHA=11110000
+        - UNMAZEDBOOT_BUILDER_GIT_BRANCH=master
+    environment:
+      - RUNNER_DEBUG_ENV=true
+    ports:
+      - 8080:8080
+
+  sample-jdk11-x-jre-custom-12:
+    image: intuit/unmazedboot-sample:jdk11-x-jre12-custom-debian${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: samples/gradle5-java-jdk11-x-jre12
+      args:
+        - UNMAZEDBOOT_BUILDER_GRADLE_VERSION=${UNMAZEDBOOT_BUILDER_GRADLE_VERSION}
+        - UNMAZEDBOOT_LINKER_VERSION=${UNMAZEDBOOT_LINKER_VERSION}
+        - UNMAZEDBOOT_RUNNER_VERSION=${UNMAZEDBOOT_RUNNER_VERSION}
+        - UNMAZEDBOOT_BUILDER_GIT_SHA=11110000
+        - UNMAZEDBOOT_BUILDER_GIT_BRANCH=master
+    environment:
+      - RUNNER_DEBUG_ENV=true
+    ports:
+      - 8081:8080
+
+  samples-gradle-java-jdk8-x-jre-custom-11-alpine:
+    image: intuit/unmazedboot-sample:jdk8-x-jre11-custom-alpine${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: samples/gradle-java-jdk8-x-jre11-custom
+      args:
+        - UNMAZEDBOOT_BUILDER_GRADLE_VERSION=${UNMAZEDBOOT_BUILDER_GRADLE_VERSION}
+        - UNMAZEDBOOT_LINKER_VERSION=${UNMAZEDBOOT_LINKER_VERSION}
+        - UNMAZEDBOOT_RUNNER_VERSION=${UNMAZEDBOOT_RUNNER_VERSION}
+        - UNMAZEDBOOT_BUILDER_GIT_SHA=11110000
+        - UNMAZEDBOOT_BUILDER_GIT_BRANCH=master
+    environment:
+      - DEBUG_ENV=true
+      #- JAVA_OPTS=--marcello
+    ports:
+      - 8082:8080
+    # volumes:
+    #    - "./samples/gradle-java-jdk8-x-jre11-custom/hooks/sources:/runtime/sources/"
+    #    - "./samples/gradle-java-jdk8-x-jre11-custom/hooks/java-opts:/runtime/java-opts"
+
+  samples-gradle-java-jdk8-x-jre-custom-11-debian:
+    image: intuit/unmazedboot-sample:jdk8-x-jre11-custom-debian${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: samples/gradle-java-jdk8-x-jre11-custom-debian
+      args:
+        - UNMAZEDBOOT_BUILDER_GRADLE_VERSION=${UNMAZEDBOOT_BUILDER_GRADLE_VERSION}
+        - UNMAZEDBOOT_LINKER_VERSION=${UNMAZEDBOOT_LINKER_VERSION}
+        - UNMAZEDBOOT_RUNNER_VERSION=${UNMAZEDBOOT_RUNNER_VERSION} 
+        - UNMAZEDBOOT_BUILDER_GIT_SHA=00011001
+        - UNMAZEDBOOT_BUILDER_GIT_BRANCH=develop
+    environment:
+      - RUNNER_DEBUG_ENV=true
+      #- JAVA_OPTS=--marcello
+    ports:
+      - 8083:8080
+    # volumes:
+    #    - "./samples/gradle-java-jdk8-x-jre11-custom/hooks/sources:/runtime/sources/"
+    #    - "./samples/gradle-java-jdk8-x-jre11-custom/hooks/java-opts:/runtime/java-opts"
+
+  samples-gradle-java-jdk8-x-jre-custom-11-centos:
+    image: intuit/unmazedboot-sample:jdk8-x-jre11-custom-centos${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: samples/gradle-java-jdk8-x-jre11-custom-centos
+      args:
+        - UNMAZEDBOOT_BUILDER_GRADLE_VERSION=${UNMAZEDBOOT_BUILDER_GRADLE_VERSION}
+        - UNMAZEDBOOT_LINKER_VERSION=${UNMAZEDBOOT_LINKER_VERSION}
+        - UNMAZEDBOOT_RUNNER_VERSION=${UNMAZEDBOOT_RUNNER_VERSION}
+        - UNMAZEDBOOT_BUILDER_GIT_SHA=00011001
+        - UNMAZEDBOOT_BUILDER_GIT_BRANCH=develop
+    environment:
+      - RUNNER_DEBUG_ENV=true
+      #- JAVA_OPTS=--marcello
+    ports:
+      - 8084:8080
+    # volumes:
+    #    - "./samples/gradle-java-jdk8-x-jre11-custom/hooks/sources:/runtime/sources/"
+    #    - "./samples/gradle-java-jdk8-x-jre11-custom/hooks/java-opts:/runtime/java-opts"
+
+  samples-maven-java-jdk11-x-jre-custom-11:
+    image: intuit/unmazedboot-sample:jre11-custom${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: samples/maven-java-jdk11-custom
+      args:
+        - UNMAZEDBOOT_BUILDER_MAVEN_VERSION=${UNMAZEDBOOT_BUILDER_MAVEN_VERSION}
+        - UNMAZEDBOOT_LINKER_VERSION=${UNMAZEDBOOT_LINKER_VERSION}
+        - UNMAZEDBOOT_RUNNER_VERSION=${UNMAZEDBOOT_RUNNER_VERSION}
+    ports:
+      - 8085:8080
+      - 7199:7199
+    volumes:
+      - "~/.m2:/root/.m2"
+      - "./samples/maven-java-jdk11-custom/jfr-config:/runtime/jfr"
+    environment:
+      - DEBUG_ENV=true
+      - JAVA_OPTS=-showversion -XshowSettings:vm
+      - SPRING_CONFIG_LOCATION=/runtime/jfr/application.yml
+
+############ Kotlin Samples
+
+  samples-gradle-kotlin-jdk8-jre8:
+    image: intuit/unmazedboot-sample-kotlin:jdk8-jre8-debian${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: samples/gradle-kotlin-jdk1.8
+      args:
+        - UNMAZEDBOOT_BUILDER_GRADLE_VERSION=${UNMAZEDBOOT_BUILDER_GRADLE_VERSION}
+        - UNMAZEDBOOT_RUNNER_VERSION=${UNMAZEDBOOT_RUNNER_VERSION}
+    ports:
+      - 8086:8080
+    environment:
+      - DEBUG_ENV=true
+      - JAVA_OPTS=-showversion -XshowSettings:vm
+
+  #samples/gradle-kotlin-jdk10-jre10:

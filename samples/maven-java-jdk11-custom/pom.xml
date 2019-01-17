@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.example.hrkm</groupId>
+  <artifactId>k8s-jmc-sample</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>k8s-jmc-sample</name>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.0.4.RELEASE</version>
+    <relativePath /> <!-- lookup parent from repository -->
+  </parent>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.version>1.8</java.version>
+    <gcp.project.name></gcp.project.name>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
+    <dependency>
+      <groupId>org.eclipse.jgit</groupId>
+      <artifactId>org.eclipse.jgit</artifactId>
+      <version>5.0.1.201806211838-r</version>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>com.google.cloud.tools</groupId>
+        <artifactId>jib-maven-plugin</artifactId>
+        <version>0.9.8</version>
+        <configuration>
+          <from>
+            <image>openjdk:11-jdk</image>
+          </from>
+          <to>
+            <image>gcr.io/${gcp.project.name}/${project.name}:${project.version}</image>
+          </to>
+          <container>
+            <useCurrentTimestamp>true</useCurrentTimestamp>
+            <jvmFlags>
+              <jvmFlag>-XX:StartFlightRecording=name=sample,filename=/spring-boot/jfr/sample.jfr,delay=30s,maxage=2h,maxsize=10m,dumponexit=true,settings=/spring-boot/config/profile.jfc</jvmFlag>
+              <jvmFlag>-Dcom.sun.management.jmxremote.port=7199</jvmFlag>
+              <jvmFlag>-Dcom.sun.management.jmxremote.rmi.port=7199</jvmFlag>
+              <jvmFlag>-Dcom.sun.management.jmxremote.authenticate=false</jvmFlag>
+              <jvmFlag>-Dcom.sun.management.jmxremote.ssl=false</jvmFlag>
+            </jvmFlags>
+            <args>
+              <arg>--server.port=${SPRING_SERVER_PORT}</arg>
+              <arg>--spring.config.location=/spring-boot/config/application.yaml</arg>
+            </args>
+          </container>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+
+</project>

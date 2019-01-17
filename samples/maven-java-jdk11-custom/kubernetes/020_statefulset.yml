@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: k8s-jmc-sample
+spec:
+  replicas: 1
+  serviceName: k8s-jmc-sample
+  selector:
+    matchLabels:
+      app: k8s-jmc-sample
+      tire: backend
+  template:
+    metadata:
+      labels:
+        app: k8s-jmc-sample
+        tire: backend
+    spec:
+      containers:
+      - name: k8s-jmc-sample
+        image: gcr.io/{change-it-me}/k8s-jmc-sample:0.1.0-SNAPSHOT
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: 300m
+            memory: 512Mi
+          limits:
+            cpu: 900m
+            memory: 512Mi
+        ports:
+        - containerPort: 30001
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 30001
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 30
+          initialDelaySeconds: 30
+        readinessProbe:
+          failureThreshold: 30
+          httpGet:
+            path: /actuator/health
+            port: 30001
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+        - name: SPRING_PROFILES_ACTIVE
+          value: "development"
+        - name: SPRING_SERVER_PORT
+          value: "30001"
+        volumeMounts:
+        - mountPath: /spring-boot/config
+          name: spring-boot-config
+        - mountPath: /spring-boot/jfr
+          name: flight-record-dir
+      volumes:
+      - name: spring-boot-config
+        configMap:
+          name: spring-boot-config
+  volumeClaimTemplates:
+  - metadata:
+      name: flight-record-dir
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+
+
+          
