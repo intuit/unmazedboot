@@ -112,7 +112,7 @@ services:
   samples-gradle-kotlin-jdk8-jre8:
     image: intuit/unmazedboot-sample-kotlin:jdk8-jre8-debian${UNMAZEDBOOT_RUNNER_VERSION}
     build:
-      context: samples/gradle-kotlin-jdk1.8
+      context: samples/gradle-kotlin-jdk8-jre8
       args:
         - UNMAZEDBOOT_BUILDER_GRADLE_VERSION=${UNMAZEDBOOT_BUILDER_GRADLE_VERSION}
         - UNMAZEDBOOT_RUNNER_VERSION=${UNMAZEDBOOT_RUNNER_VERSION}
