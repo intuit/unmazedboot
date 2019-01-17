@@ -34,7 +34,7 @@ services:
   samples-gradle-java-jdk8-x-jre-custom-11-alpine:
     image: intuit/unmazedboot-sample:jdk8-x-jre11-custom-alpine${UNMAZEDBOOT_RUNNER_VERSION}
     build:
-      context: samples/gradle-java-jdk8-x-jre11-custom
+      context: samples/gradle-java-jdk8-x-jre11-custom-alpine
       args:
         - UNMAZEDBOOT_BUILDER_GRADLE_VERSION=${UNMAZEDBOOT_BUILDER_GRADLE_VERSION}
         - UNMAZEDBOOT_LINKER_VERSION=${UNMAZEDBOOT_LINKER_VERSION}
