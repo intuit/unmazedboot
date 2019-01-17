@@ -77,9 +77,8 @@ Look at the directory `samples` for details.
 * Uses Gradle as the builder tool and requires:
   * `build.gradle`: Main build file
   * `settings.gradle`: Project settings
-  * `src/build/gradle`: Individual tasks implementation linked at `build.gradle`
 * Regular Java project using maven structure
-  * `src/main/java`: java project
+  * `src`: java source directory with any code
 
 ## Gradle Builder Args
 
@@ -111,9 +110,8 @@ RUN echo "You can add extra packages or anything needed to the final image for b
 * Uses Maven as the builder tool and requires:
   * `pom.xml`: Main build file
   * `settings.xml`: Project settings
-  * `src/build/gradle`: Individual tasks implementation linked at `build.gradle`
 * Regular Java project using maven structure
-  * `src/main/java`: java project
+  * `src`: java source directory with any structure
 
 ## Maven Builder Args
 
