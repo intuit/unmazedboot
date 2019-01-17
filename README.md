@@ -25,6 +25,21 @@ Get started with your SpringBoot App in seconds. Use your favorite builder (Grad
 
 All images are located at the [DockerHub Intuit Repository](https://cloud.docker.com/u/intuit/repository/list?name=unmazedboot&namespace=intuit).
 
+## Process
+
+1. Create a Dockerfile selecting the first stage the Builder image
+
+This step requires the inspection of the build system used and the target JVM instructions used.
+For instance, the [Kotlin tutorial](https://spring.io/guides/tutorials/spring-boot-kotlin/) uses Gradle and JDK8. For this reason, the builder image selected is using Gradle with JDK8 (See the dir `samples/gradle-kotlin-jdk8-jre8` for details)
+
+2. If the project is to run in a JRE 8, then select the Runner image with the base OS desired
+
+Since the [Kotlin tutorial](https://spring.io/guides/tutorials/spring-boot-kotlin/) simply runs the application, then we just selected the base image with JRE8. That simplified the initial process of using the current tutorial.
+
+3. If your team is already required to migrate to JRE11 using the current code, then select a Linker image to create a custom JRE for your application based on the `.jar` produced by the Builder image.
+
+This requires a matching base image with a matching OS type. For instance, if you will run on Alpine, then select a Linker image on Alpine with the JDK11 type (See the dir `samples/gradle-java-jdk8-x-jre11-custom-alpine` for details)
+
 ## Builder
 
 Implementation of a set of `ONBUILD` instructions that are reusable for any SpringBoot Application:
