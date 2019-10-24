@@ -202,7 +202,7 @@ Go to the directory `sample` directory for more details.
 Building all samples in parallel (`docker-compose version 1.23.1, build b02f1306`)
 
 ```
-$ docker-compose -f docker-compose-samples.yaml build --parallel
+$ docker-compose -f docker-compose-samples.yml build --parallel
 Building sample-gradle-java-jre8          ...
 Building sample-gradle-java-jre10         ...
 Building samples-gradle-java-custom-jre10 ...
@@ -225,7 +225,7 @@ initialized via `InitContainer` and requires sources. There are 2 types as expla
 above and the sample is in JDK 11 cross-compiled
 
 ```
-$ docker-compose -f docker-compose-samples.yaml up --build samples-gradle-java-jdk8-x-jre-custom-11
+$ docker-compose -f docker-compose-samples.yml up --build samples-gradle-java-jdk8-x-jre-custom-11
 Building samples-gradle-java-jdk8-x-jre-custom-11
 Step 1/10 : ARG BUILDER_GIT_SHA=${GIT_SHA:-0101010}
 Step 2/10 : ARG BUILDER_GIT_BRANCH=${GIT_BRANCH:-develop}
@@ -311,7 +311,7 @@ samples-gradle-java-jdk8-x-jre-custom-11_1_76ab77ce7bd7 |  =========|_|=========
 ## Start all samples
 
 ```
-$ docker-compose -f docker-compose-samples.yaml up
+$ docker-compose -f docker-compose-samples.yml up
 ```
 
 # Contributing
