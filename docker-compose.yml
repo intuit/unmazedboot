@@ -148,7 +148,7 @@ services:
     build:
       context: linker
       args:
-        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=sgrio/java-oracle:jdk_11_centos
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=sgrio/java:jdk_11_centos
         - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=echo none
         - UNMAZEDBOOT_CUSTOM_JLINK_PATH=/usr/lib/jvm/java-11-oracle/bin/jlink
 
@@ -214,7 +214,7 @@ services:
       context: runner
       dockerfile: regular-jdk/Dockerfile
       args:
-        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=sgrio/java-oracle:jdk_11_centos
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=sgrio/java:jdk_11_centos
         - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=echo none
 
   runner-oraclejdk-11-alpine:
@@ -223,5 +223,5 @@ services:
       context: runner
       dockerfile: regular-jdk/Dockerfile
       args:
-        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=sgrio/java-oracle:jdk_11_alpine
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=sgrio/java:jdk_11_alpine
         - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=apk update && apk add bash ca-certificates libressl libressl-dev --no-cache && update-ca-certificates
