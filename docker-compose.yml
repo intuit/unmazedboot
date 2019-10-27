@@ -114,7 +114,7 @@ services:
       context: linker
       args:
         - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=alpine:3.8
-        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=wget https://download.java.net/java/early_access/alpine/25/binaries/openjdk-11-ea+25_linux-x64-musl_bin.tar.gz && tar zxf openjdk-11-ea+25_linux-x64-musl_bin.tar.gz && ln -s jdk-11 jdk && rm -f openjdk-11-ea+25_linux-x64-musl_bin.tar.gz
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=wget https://download.java.net/openjdk/jdk11/ri/openjdk-11+28_linux-x64_bin.tar.gz && tar -xvzf openjdk-11\+28_linux-x64_bin.tar.gz && ln -s jdk-11 jdk && rm -f openjdk-11\+28_linux-x64_bin.tar.gz
 
   # https://github.com/docker-library/openjdk/issues/217#issuecomment-436275472
   # Debian generates large libjvm and can be decreased
