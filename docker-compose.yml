@@ -225,3 +225,41 @@ services:
       args:
         - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=sgrio/java:jdk_11_alpine
         - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=apk update && apk add bash ca-certificates libressl libressl-dev --no-cache && update-ca-certificates
+
+#JDK 12 runner images
+
+  runner-openjdk-12-alpine3.10:
+    image: intuit/unmazedboot-runner:openjdk14-ea-12-jdk-alpine3.10${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: runner
+      dockerfile: regular-jdk/Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=openjdk:14-ea-12-jdk-alpine3.10
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=apk update && apk add bash ca-certificates libressl libressl-dev --no-cache && update-ca-certificates
+
+  runner-oraclejdk-12-alpine:
+    image: intuit/unmazedboot-runner:oraclejdk-12-alpine${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: runner
+      dockerfile: regular-jdk/Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=sgrio/java:jdk_12_alpine
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=apk update && apk add bash ca-certificates libressl libressl-dev --no-cache && update-ca-certificates
+
+  runner-oraclejdk-jdk_12_centos:
+    image: intuit/unmazedboot-runner:oraclejdk-12-centos${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: runner
+      dockerfile: regular-jdk/Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=sgrio/java:jdk_12_centos
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=echo none
+
+  runner-openjdk-12-debian-slim:
+    image: intuit/unmazedboot-runner:openjdk-12-debian-slim${UNMAZEDBOOT_RUNNER_VERSION}
+    build:
+      context: runner
+      dockerfile: regular-jdk/Dockerfile
+      args:
+        - UNMAZEDBOOT_INTERNAL_BASE_IMAGE=adoptopenjdk/openjdk12:x86_64-debian-jdk-12.0.2_10-slim
+        - UNMAZEDBOOT_INTERNAL_DEPENDENCIES=apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && apt-get clean && rm -rf /var/lib/apt/lists/*
